@@ -4,15 +4,20 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "lil-gui";
 import LightSphere from "./light-sphere";
 import LightSphereGrid from "./light-sphere-grid";
+import { convertToMorse } from "./utilities/morse-code";
 
-const SPHERE_ROW_COUNT = 10;
-const SPHERE_COLUMN_COUNT = 10;
+let gridUpdateIntervalInSecs = 0.25;
 
 /**
  * Base
  */
 // Debug
 const gui = new dat.GUI();
+const debugValues = {
+	gridUpdateIntervalInSecs: 0.25,
+};
+
+gui.add(debugValues, "gridUpdateIntervalInSecs", 0.01, 2, 0.1);
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -84,13 +89,21 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 /**
  * Animate
  */
+let nextGridUpdate = 0;
 const clock = new THREE.Clock();
 
 const tick = () => {
+	const { gridUpdateIntervalInSecs } = debugValues;
+
 	const elapsedTime = clock.getElapsedTime();
 
 	// Update material
 	// material.uniforms.uTime.value = elapsedTime
+	if (elapsedTime > nextGridUpdate) {
+		lightSphereGrid.update();
+
+		nextGridUpdate = elapsedTime + gridUpdateIntervalInSecs;
+	}
 
 	// Update controls
 	controls.update();
