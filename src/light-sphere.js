@@ -1,7 +1,7 @@
 import * as THREE from "three";
+import { FLICKER_PATTERN_SIZE } from "./utilities/constants";
 
 const SPHERE_COLOR = 0xf700c1;
-const LIGHT_FLICKER_PATTERN_SIZE = 10;
 
 function defaultInitialDelay() {
 	return 500 + 500 * Math.random();
@@ -21,9 +21,10 @@ export default class LightSphere {
 
 		this.sphere = sphere;
 
-		this.lightFlickerPattern = flickerPattern;
+		// this.lightFlickerPattern = flickerPattern;
 		if (!this.lightFlickerPattern) {
-			for (let i = 0; i < LIGHT_FLICKER_PATTERN_SIZE; i++) {
+			this.lightFlickerPattern = [];
+			for (let i = 0; i < FLICKER_PATTERN_SIZE; i++) {
 				const lightFlickerPatternValue = Math.random() > 0.5;
 				this.lightFlickerPattern.push(lightFlickerPatternValue);
 			}
@@ -53,7 +54,6 @@ export default class LightSphere {
 		this.toggleVisibility(nextIsVisible);
 
 		this.lightFlickerPatternReadPosition =
-			(this.lightFlickerPatternReadPosition + 1) %
-			LIGHT_FLICKER_PATTERN_SIZE;
+			(this.lightFlickerPatternReadPosition + 1) % FLICKER_PATTERN_SIZE;
 	}
 }
