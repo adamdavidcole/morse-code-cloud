@@ -1,11 +1,39 @@
 import * as THREE from "three";
 import { FLICKER_PATTERN_SIZE } from "./utilities/constants";
 
-const SPHERE_COLOR = 0xf700c1;
+const SPHERE_COLOR = 0x3c2537;
+const EMISSIVE_COOR = 0xf700c1;
 
 function defaultInitialDelay() {
 	return 500 + 500 * Math.random();
 }
+
+const lightOffIntensity = 0.3;
+
+// const lightOffMaterial = new THREE.MeshPhysicalMaterial({
+// 	color: new THREE.Color(SPHERE_COLOR),
+// 	emissive: new THREE.Color(EMISSIVE_COOR),
+// 	emissiveIntensity: 0.3,
+// 	reflectivity: 0.75,
+// 	transparent: true,
+// 	opacity: 0.3,
+// 	depthTest: true,
+// 	depthWrite: true,
+// 	visible: true,
+// 	side: THREE.DoubleSide,
+// });
+// const lightOnMaterial = new THREE.MeshPhysicalMaterial({
+// 	color: new THREE.Color(SPHERE_COLOR),
+// 	emissive: new THREE.Color(EMISSIVE_COOR),
+// 	emissiveIntensity: 0.3,
+// 	reflectivity: 0.75,
+// 	transparent: true,
+// 	opacity: 0.3,
+// 	depthTest: true,
+// 	depthWrite: true,
+// 	visible: true,
+// 	side: THREE.DoubleSide,
+// });
 
 export default class LightSphere {
 	constructor({
@@ -13,25 +41,41 @@ export default class LightSphere {
 		size = 1,
 		intervalDeley = defaultInitialDelay(),
 		flickerPattern,
+		gridPosition,
 	}) {
 		const geometry = new THREE.SphereGeometry(size, 32, 32);
-		const material = new THREE.MeshBasicMaterial({ color: SPHERE_COLOR });
+		const material = new THREE.MeshPhysicalMaterial({
+			color: new THREE.Color(SPHERE_COLOR),
+			emissive: new THREE.Color(EMISSIVE_COOR),
+			emissiveIntensity: 0.3,
+			reflectivity: 0.75,
+			transparent: true,
+			opacity: 0.75,
+			depthTest: true,
+			depthWrite: true,
+			visible: true,
+			side: THREE.DoubleSide,
+		});
+		// const material = new THREE.MeshBasicMaterial({ color: SPHERE_COLOR });
 		const sphere = new THREE.Mesh(geometry, material);
 		sphere.position.copy(position);
 
 		this.sphere = sphere;
+		this.lightOn = false;
+		this.lightOnTime = 0;
+		this.gridPosition = gridPosition;
 
 		// this.lightFlickerPattern = flickerPattern;
-		if (!this.lightFlickerPattern) {
-			this.lightFlickerPattern = [];
-			for (let i = 0; i < FLICKER_PATTERN_SIZE; i++) {
-				const lightFlickerPatternValue = Math.random() > 0.5;
-				this.lightFlickerPattern.push(lightFlickerPatternValue);
-			}
-		}
-		this.lightFlickerPatternReadPosition = 0;
+		// if (!this.lightFlickerPattern) {
+		// 	this.lightFlickerPattern = [];
+		// 	for (let i = 0; i < FLICKER_PATTERN_SIZE; i++) {
+		// 		const lightFlickerPatternValue = Math.random() > 0.5;
+		// 		this.lightFlickerPattern.push(lightFlickerPatternValue);
+		// 	}
+		// }
+		// this.lightFlickerPatternReadPosition = 0;
 
-		this.intervalDeley = intervalDeley;
+		// this.intervalDeley = intervalDeley;
 
 		// setInterval(() => {
 		// 	const currVisibility = !!this.sphere.visible;
@@ -48,12 +92,40 @@ export default class LightSphere {
 		this.sphere.visible = isVisible;
 	}
 
-	update() {
-		const nextIsVisible =
-			this.lightFlickerPattern[this.lightFlickerPatternReadPosition];
-		this.toggleVisibility(nextIsVisible);
+	toggleVisibility(isVisible) {
+		// console.log("toggleVisibility: isVisible", isVisible);
+		this.sphere.visible = isVisible;
+	}
 
-		this.lightFlickerPatternReadPosition =
-			(this.lightFlickerPatternReadPosition + 1) % FLICKER_PATTERN_SIZE;
+	toggleLightOn() {
+		// console.log("toggleVisibility: isVisible", isVisible);
+		const isLightCurrentlyOn = this.lightOn;
+		if (isLightCurrentlyOn) {
+			// this.sphere.material.emissiveIntensity = lightOffIntensity;
+			// this.lightOn = false;
+		} else {
+			this.sphere.material.emissiveIntensity = 1.0;
+			this.lightOn = true;
+			this.lightOnTime = Date.now();
+		}
+	}
+
+	update() {
+		if (this.lightOn) {
+			if (Date.now() - this.lightOnTime > 750) {
+				this.sphere.material.emissiveIntensity =
+					this.sphere.material.emissiveIntensity * 0.99;
+			}
+		}
+
+		if (this.sphere.material.emissiveIntensity <= lightOffIntensity) {
+			this.sphere.material.emissiveIntensity = lightOffIntensity;
+			this.lightOn = false;
+		}
+		// const nextIsVisible =
+		// 	this.lightFlickerPattern[this.lightFlickerPatternReadPosition];
+		// this.toggleVisibility(nextIsVisible);
+		// this.lightFlickerPatternReadPosition =
+		// 	(this.lightFlickerPatternReadPosition + 1) % FLICKER_PATTERN_SIZE;
 	}
 }
