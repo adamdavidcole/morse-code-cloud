@@ -21,23 +21,26 @@ let patterns = {
 const gui = new dat.GUI();
 const debugValues = {
 	gridUpdateIntervalInSecs: 0.25,
-	pattern: patterns.flickering,
+	pattern: patterns.wave_circle,
 };
 
 // gui.add(debugValues, "gridUpdateIntervalInSecs", 0.01, 2, 0.1);
-gui.add(debugValues, "pattern", patterns).onChange((v) => {
-	console.log("Begin new pattern: " + v);
+gui.add(debugValues, "pattern", patterns)
+	.onChange((v) => {
+		clearInterval(autoPatternInterval);
+		console.log("Begin new pattern: " + v);
 
-	if (v == patterns.flickering) {
-		beginFlickerPattern();
-	}
-	if (v == patterns.wave_horizontal) {
-		beginWaveHorizontalPattern();
-	}
-	if (v == patterns.wave_circle) {
-		beginWaveCirclePattern();
-	}
-});
+		if (v == patterns.flickering) {
+			beginFlickerPattern();
+		}
+		if (v == patterns.wave_horizontal) {
+			beginWaveHorizontalPattern();
+		}
+		if (v == patterns.wave_circle) {
+			beginWaveCirclePattern();
+		}
+	})
+	.listen();
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -197,7 +200,20 @@ function beginFlickerPattern() {
 	}, 20);
 }
 
-beginFlickerPattern();
+beginWaveCirclePattern();
+
+const autoPatternInterval = setInterval(() => {
+	if (debugValues.pattern == patterns.flickering) {
+		debugValues.pattern = patterns.wave_horizontal;
+		beginWaveHorizontalPattern();
+	} else if (debugValues.pattern == patterns.wave_horizontal) {
+		debugValues.pattern = patterns.wave_circle;
+		beginWaveCirclePattern();
+	} else if (debugValues.pattern == patterns.wave_circle) {
+		debugValues.pattern = patterns.flickering;
+		beginFlickerPattern();
+	}
+}, 10000);
 
 /**
  * Animate

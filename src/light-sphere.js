@@ -62,6 +62,7 @@ export default class LightSphere {
 
 		this.sphere = sphere;
 		this.lightOn = false;
+		this.isTurningLightOn = false;
 		this.lightOnTime = 0;
 		this.gridPosition = gridPosition;
 
@@ -104,13 +105,24 @@ export default class LightSphere {
 			// this.sphere.material.emissiveIntensity = lightOffIntensity;
 			// this.lightOn = false;
 		} else {
-			this.sphere.material.emissiveIntensity = 1.0;
+			// this.sphere.material.emissiveIntensity = 1.0;
 			this.lightOn = true;
+			this.isTurningLightOn = true;
 			this.lightOnTime = Date.now();
 		}
 	}
 
 	update() {
+		if (this.isTurningLightOn) {
+			this.sphere.material.emissiveIntensity =
+				this.sphere.material.emissiveIntensity * 1.05;
+
+			if (this.sphere.material.emissiveIntensity >= 0.99) {
+				this.sphere.material.emissiveIntensity = 1.0;
+				this.isTurningLightOn = false;
+			}
+		}
+
 		if (this.lightOn) {
 			if (Date.now() - this.lightOnTime > 750) {
 				this.sphere.material.emissiveIntensity =
