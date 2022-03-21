@@ -99,17 +99,9 @@ export default class LightSphere {
 	}
 
 	toggleLightOn() {
-		// console.log("toggleVisibility: isVisible", isVisible);
-		const isLightCurrentlyOn = this.lightOn;
-		if (isLightCurrentlyOn) {
-			// this.sphere.material.emissiveIntensity = lightOffIntensity;
-			// this.lightOn = false;
-		} else {
-			// this.sphere.material.emissiveIntensity = 1.0;
-			this.lightOn = true;
-			this.isTurningLightOn = true;
-			this.lightOnTime = Date.now();
-		}
+		this.lightOn = true;
+		this.isTurningLightOn = true;
+		this.lightOnTime = Date.now();
 	}
 
 	update() {
